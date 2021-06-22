@@ -1,0 +1,15 @@
+version: "3.3"
+
+services:
+  e-threader:
+    build: ./app
+    volumes:
+      - ./app:/opt/app
+      - ./db.sqlite:/opt/db.sqlite
+      - ./config.yaml:/opt/config.yaml
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+    restart: always
+    tty: true
