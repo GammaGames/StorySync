@@ -3,6 +3,8 @@ import praw
 import os
 import re
 
+from config import load_config
+
 
 def main():
     client = praw.Reddit(
@@ -12,7 +14,7 @@ def main():
         password=os.getenv("REDDIT_PASSWORD", ""),
         user_agent="Personal story sync",
     )
-    config = yaml.safe_load(open("/opt/config.yaml"))
+    config = load_config()
 
     for username, settings in config.items():
         print("User:", username, "comments" in settings["from"]["WritingPrompts"])

@@ -9,7 +9,5 @@ services:
       - ./config.yaml:/opt/config.yaml
     env_file:
       - .env
-    ports:
-      - "80:80"
     restart: always
     tty: true
