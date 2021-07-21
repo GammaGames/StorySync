@@ -1,4 +1,5 @@
 import yaml
+from datetime import datetime, timedelta
 
 
 def load_config():
@@ -27,13 +28,21 @@ def filter_comments(comments, config):
         and "comments" in config["from"][c.subreddit.display_name]  # Comments has to be in subreddit settings
         and (  # If the comments require a title
             ("require-title" in config["from"][c.subreddit.display_name]["comments"] and c.body.startswith("#"))
-            or True
+            or "require-title" not in config["from"][c.subreddit.display_name]["comments"]  # The logic here is broken :/
         )
         and (  # If there is a delay
-            True
+            (
+                "delay" in config["from"][c.subreddit.display_name]["comments"]
+                and datetime.fromtimestamp(c.created_utc) < (datetime.now() - timedelta(**config["from"][c.subreddit.display_name]["comments"]["delay"]))
+            )
+            or "delay" not in config["from"][c.subreddit.display_name]["comments"]
         )
     ]
 
 
 def filter_posts(posts, config):
-    pass
+    return [
+        p for p in posts
+        if p.subreddit.display_name in config["from"]  # Subreddit has to be in settings
+        and "posts" in config["from"][p.subreddit.display_name]  # Posts has to be in subreddit settings
+    ]

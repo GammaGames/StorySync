@@ -2,8 +2,9 @@ import yaml
 import praw
 import os
 import re
+from datetime import datetime, timedelta
 
-from config import load_config
+from config import load_config, filter_comments, filter_posts
 
 
 def main():
@@ -18,20 +19,20 @@ def main():
 
     for username, settings in config.items():
         print("User:", username, "comments" in settings["from"]["WritingPrompts"])
-        posts = [
-            p for p in client.redditor(username).submissions.new(limit=8)
-            if p.subreddit.display_name in settings["from"]  # Subreddit has to be in settings
-            and "posts" in settings["from"][p.subreddit.display_name]  # Posts has to be in subreddit settings
-        ]
-
-        comments = filter_comments(client.redditor(username).comments.new(limit=64), settings)
+        posts = filter_posts( client.redditor(username).submissions.new(limit=16), settings)
+        comments = filter_comments(client.redditor(username).comments.new(limit=32), settings)
 
         for post in posts:
             print("Post:", post.subreddit.display_name, ":", post.name)
 
         for comment in comments:
             print("Comment", comment.subreddit.display_name, ":", comment.body.split("\n")[0])
-            print(parse_comment_title(comment.body, True))
+            print(
+                parse_comment_title(comment.body, True),
+                datetime.fromtimestamp(comment.created_utc),
+                datetime.now() - timedelta(**settings["from"][comment.subreddit.display_name]["comments"]["delay"]),
+                datetime.fromtimestamp(comment.created_utc) < datetime.now() - timedelta(**settings["from"][comment.subreddit.display_name]["comments"]["delay"])
+            )
 
         # TODO check if posts and stuff are already stored
         # TODO If they are stored, check if they need to be updated
@@ -48,19 +49,6 @@ def parse_comment_title(comment, subtitle=False):
         title += f" - {subtitle_match.group('subtitle')}" if subtitle_match is not None else ""
 
     return title
-
-
-def filter_comments(comments, config):
-    return [
-        c for c in comments
-        if c.parent_id.startswith("t3_")  # Only first-child comments
-        and c.subreddit.display_name in config["from"]  # Subreddit has to be in settings
-        and "comments" in config["from"][c.subreddit.display_name]  # Comments has to be in subreddit settings
-        and (  # If the comments require a title
-            ("require-title" in config["from"][c.subreddit.display_name]["comments"] and c.body.startswith("#"))
-            or True
-        )
-    ]
 
 
 if __name__ == "__main__":
