@@ -18,21 +18,20 @@ def main():
     config = load_config()
 
     for username, settings in config.items():
-        print("User:", username, "comments" in settings["from"]["WritingPrompts"])
-        posts = filter_posts( client.redditor(username).submissions.new(limit=16), settings)
-        comments = filter_comments(client.redditor(username).comments.new(limit=32), settings)
+        posts = filter_posts( client.redditor(username).submissions.new(limit=settings["count"]["posts"]), settings)
+        comments = filter_comments(client.redditor(username).comments.new(limit=settings["count"]["comments"]), settings)
 
         for post in posts:
             print("Post:", post.subreddit.display_name, ":", post.name)
 
         for comment in comments:
-            print("Comment", comment.subreddit.display_name, ":", comment.body.split("\n")[0])
-            print(
-                parse_comment_title(comment.body, True),
-                datetime.fromtimestamp(comment.created_utc),
-                datetime.now() - timedelta(**settings["from"][comment.subreddit.display_name]["comments"]["delay"]),
-                datetime.fromtimestamp(comment.created_utc) < datetime.now() - timedelta(**settings["from"][comment.subreddit.display_name]["comments"]["delay"])
-            )
+            print("Comment", comment.subreddit.display_name, ":", parse_comment_title(comment.body, True))
+            # print(
+            #     parse_comment_title(comment.body, True),
+            #     datetime.fromtimestamp(comment.created_utc),
+            #     datetime.now() - timedelta(**settings["from"][comment.subreddit.display_name]["comments"]["delay"]),
+            #     datetime.fromtimestamp(comment.created_utc) < datetime.now() - timedelta(**settings["from"][comment.subreddit.display_name]["comments"]["delay"])
+            # )
 
         # TODO check if posts and stuff are already stored
         # TODO If they are stored, check if they need to be updated

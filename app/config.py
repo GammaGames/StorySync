@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 
 def load_config():
-    data = yaml.safe_load(open("/opt/config.yaml"))
+    data = yaml.safe_load(open("/config.yaml"))
 
     for username, settings in data.items():
         for subreddit, content_types in settings["from"].items():
@@ -28,7 +28,7 @@ def filter_comments(comments, config):
         and "comments" in config["from"][c.subreddit.display_name]  # Comments has to be in subreddit settings
         and (  # If the comments require a title
             ("require-title" in config["from"][c.subreddit.display_name]["comments"] and c.body.startswith("#"))
-            or "require-title" not in config["from"][c.subreddit.display_name]["comments"]  # The logic here is broken :/
+            or "require-title" not in config["from"][c.subreddit.display_name]["comments"]
         )
         and (  # If there is a delay
             (
