@@ -3,6 +3,7 @@ import praw
 import os
 import re
 from datetime import datetime, timedelta
+from models import get_model, Story
 
 from config import load_config, filter_comments, filter_posts
 
@@ -22,10 +23,12 @@ def main():
         comments = filter_comments(client.redditor(username).comments.new(limit=settings["count"]["comments"]), settings)
 
         for post in posts:
-            print("Post:", post.subreddit.display_name, ":", post.name)
+            print("Post:", post.subreddit.display_name, ":", post.title)
 
         for comment in comments:
             print("Comment", comment.subreddit.display_name, ":", parse_comment_title(comment.body, True))
+            print(comment.permalink)
+            model = get_model(Story, type="comment", source_permalink=comment.permalink)
             # print(
             #     parse_comment_title(comment.body, True),
             #     datetime.fromtimestamp(comment.created_utc),

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 
 def load_config():
-    data = yaml.safe_load(open("/config.yaml"))
+    data = yaml.safe_load(open("./config.yaml"))
 
     for username, settings in data.items():
         for subreddit, content_types in settings["from"].items():
@@ -21,23 +21,33 @@ def load_config():
 
 
 def filter_comments(comments, config):
-    return [
-        c for c in comments
-        if c.parent_id.startswith("t3_")  # Only first-child comments
-        and c.subreddit.display_name in config["from"]  # Subreddit has to be in settings
-        and "comments" in config["from"][c.subreddit.display_name]  # Comments has to be in subreddit settings
+    result = [c for c in comments if filter_comment(c, config)]
+    for comment in result:
+        # TODO get chained comments if it's enabled
+        pass
+
+    return result
+
+
+def filter_comment(comment, config):
+    return (
+        comment.parent_id.startswith("t3_") # Only first-child comments
+        and not comment.stickied  # Mostly for mods lol
+        and comment.subreddit.display_name in config["from"]  # Subreddit has to be in settings
+        and "comments" in config["from"][comment.subreddit.display_name]  # Comments has to be in subreddit settings
+        # TODO title-regex: "#\s*<?(\s*(?:\w\s*)+)>?"
         and (  # If the comments require a title
-            ("require-title" in config["from"][c.subreddit.display_name]["comments"] and c.body.startswith("#"))
-            or "require-title" not in config["from"][c.subreddit.display_name]["comments"]
+            ("require-title" in config["from"][comment.subreddit.display_name]["comments"] and comment.body.startswith("#"))
+            or "require-title" not in config["from"][comment.subreddit.display_name]["comments"]
         )
         and (  # If there is a delay
             (
-                "delay" in config["from"][c.subreddit.display_name]["comments"]
-                and datetime.fromtimestamp(c.created_utc) < (datetime.now() - timedelta(**config["from"][c.subreddit.display_name]["comments"]["delay"]))
+                "delay" in config["from"][comment.subreddit.display_name]["comments"]
+                and datetime.fromtimestamp(comment.created_utc) < (datetime.now() - timedelta(**config["from"][comment.subreddit.display_name]["comments"]["delay"]))
             )
-            or "delay" not in config["from"][c.subreddit.display_name]["comments"]
+            or "delay" not in config["from"][comment.subreddit.display_name]["comments"]
         )
-    ]
+    )
 
 
 def filter_posts(posts, config):

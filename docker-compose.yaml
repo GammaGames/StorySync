@@ -5,8 +5,7 @@ services:
     build: ./app
     volumes:
       - ./app:/app
-      - ./db.sqlite:/db.sqlite
-      - ./config.yaml:/config.yaml
+      # - ./config.yaml:/app/config.yaml
     env_file:
       - .env
     restart: always
