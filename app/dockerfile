@@ -1,10 +1,9 @@
 FROM python:3-slim
 
-ADD requirements.txt /opt/requirements.txt
+ADD requirements.txt /requirements.txt
 
 RUN apt-get update && apt-get upgrade -y \
     # apt-get install -y --no-install-recommends \
-    && pip install -r /opt/requirements.txt
+    && pip install -r /requirements.txt
 
-CMD ["sh"]
-# CMD ["python", "/opt/app/main.py"]
+CMD ["python", "/app/main.py"]

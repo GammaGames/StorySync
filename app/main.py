@@ -3,13 +3,15 @@ import praw
 import os
 import re
 from datetime import datetime, timedelta
-from models import get_model, Story
+from models import Story
+from pony.orm import db_session
 
 from config import load_config, filter_comments, filter_posts
 
 
+@db_session
 def main():
-    client = praw.Reddit(
+    reddit = praw.Reddit(
         client_id=os.getenv("REDDIT_CLIENT_ID", ""),
         client_secret=os.getenv("REDDIT_SECRET", ""),
         username=os.getenv("REDDIT_USERNAME", ""),
@@ -18,27 +20,47 @@ def main():
     )
     config = load_config()
 
+    def post_story(model):
+        # Post story
+        subreddit = reddit.subreddit(settings["to"])
+        story = subreddit.submit(
+            model.title,
+            f"{model.body}\n\n[Story From r/{model.subreddit}]({model.source_permalink})"
+        )
+        # Set permalink for updating
+        model.target_permalink = story.permalink
+
+    def edit_story(model):
+        story = reddit.post(reddit.submission.id_from_url(model.target_permalink))
+        story.edit(f"{model.body}\n\n[Story From r/{model.subreddit}]({model.source_permalink})")
+
+
     for username, settings in config.items():
-        posts = filter_posts( client.redditor(username).submissions.new(limit=settings["count"]["posts"]), settings)
-        comments = filter_comments(client.redditor(username).comments.new(limit=settings["count"]["comments"]), settings)
+        posts = filter_posts(reddit.redditor(username).submissions.new(limit=settings["count"]["posts"]), settings)
+        comments = filter_comments(reddit.redditor(username).comments.new(limit=settings["count"]["comments"]), settings)
 
         for post in posts:
-            print("Post:", post.subreddit.display_name, ":", post.title)
+            print(post.title)
 
         for comment in comments:
-            print("Comment", comment.subreddit.display_name, ":", parse_comment_title(comment.body, True))
-            print(comment.permalink)
-            model = get_model(Story, type="comment", source_permalink=comment.permalink)
-            # print(
-            #     parse_comment_title(comment.body, True),
-            #     datetime.fromtimestamp(comment.created_utc),
-            #     datetime.now() - timedelta(**settings["from"][comment.subreddit.display_name]["comments"]["delay"]),
-            #     datetime.fromtimestamp(comment.created_utc) < datetime.now() - timedelta(**settings["from"][comment.subreddit.display_name]["comments"]["delay"])
-            # )
+            model = Story[comment.id, "comment"] if Story.exists(id=comment.id, type="comment") else Story(id=comment.id, type="comment")
 
-        # TODO check if posts and stuff are already stored
-        # TODO If they are stored, check if they need to be updated
-        # TODO If they aren't, make them
+            if model.target_permalink is None:
+                model.source_permalink = comment.permalink
+                model.subreddit = comment.subreddit.display_name
+                model.source_permalink = comment.permalink
+                model.title = parse_comment_title(comment.body, True)
+                model.body = comment.body
+
+                print(f"Creating {model.id}: {model.title}")
+                post_story(model)
+
+            elif comment.edited and comment.body != model.body:
+                model.title = parse_comment_title(comment.body, True)
+                model.body = comment.body
+
+                print(f"Updating {model.id}: {model.title}")
+                edit_story(model)
 
 
 def parse_comment_title(comment, subtitle=False):

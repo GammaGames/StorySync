@@ -1,11 +1,11 @@
 version: "3.3"
 
 services:
-  e-threader:
+  storysync:
     build: ./app
     volumes:
       - ./app:/app
-      # - ./config.yaml:/app/config.yaml
+      - ./config.yaml:/config.yaml
     env_file:
       - .env
     restart: always

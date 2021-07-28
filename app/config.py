@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 
 def load_config():
-    data = yaml.safe_load(open("./config.yaml"))
+    data = yaml.safe_load(open("/config.yaml"))
 
     for username, settings in data.items():
         for subreddit, content_types in settings["from"].items():
@@ -21,10 +21,14 @@ def load_config():
 
 
 def filter_comments(comments, config):
-    result = [c for c in comments if filter_comment(c, config)]
-    for comment in result:
-        # TODO get chained comments if it's enabled
-        pass
+    result = []
+    for comment in comments:
+        if filter_comment(comment, config):
+            result.append(comment)
+
+            if "collect-chain" in config["from"][comment.subreddit.display_name]["comments"]:
+                pass
+                # TODO chain comments
 
     return result
 
