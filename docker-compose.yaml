@@ -8,5 +8,3 @@ services:
       - ./config.yaml:/config.yaml
     env_file:
       - .env
-    restart: always
-    tty: true

@@ -36,6 +36,7 @@ def main():
 
 
     for username, settings in config.items():
+        print(f"Collecting stories for {username}...")
         posts = filter_posts(reddit.redditor(username).submissions.new(limit=settings["count"]["posts"]), settings)
         comments = filter_comments(reddit.redditor(username).comments.new(limit=settings["count"]["comments"]), settings)
 
@@ -61,6 +62,9 @@ def main():
 
                 print(f"Updating {model.id}: {model.title}")
                 edit_story(model)
+
+            else:
+                print(f"Skipping {model.id}: {model.title}")
 
 
 def parse_comment_title(comment, subtitle=False):

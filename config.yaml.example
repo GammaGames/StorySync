@@ -1,0 +1,20 @@
+GammaGames:  # Take stories from /u/GammaGames
+  count:
+    posts: 16  # Only pull the latest 16 posts
+    comments: 64  # Only pull the latest 64 comments
+  from:  # A list of subreddits to allow past the filter
+    WritingPrompts:
+      comments:  # Sync comment stories
+      - delay:  # Only sync them after a delay. This can be in hours, days, weeks, etc.
+          days: 2
+      - require-title  # Require a title? I almost always have one
+    shortstories:
+      posts:  # Sync post stories from r/ss
+      - delay:
+          days: 2
+      comments:  # Sync comment stories, similar as above
+      - delay:
+          days: 2
+      - require-title
+  to:  # Post the stories to r/GammeWrites
+    GammaWrites
