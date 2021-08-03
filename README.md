@@ -43,3 +43,9 @@ Additional notes:
 3. If there is a delay and the comment goes past the count before the delay is over, the story will not be synced
 4. I filter out stickied comments, because those are usually mod actions
 5. I try to pull out titles and sub-titles (for serials)
+
+Want to make the process automatic? Add this to your `/etc/crontab` file!
+
+```
+0 7 * * * root docker-compose -f /path/to/StorySync/docker-compose.yaml up
+```
