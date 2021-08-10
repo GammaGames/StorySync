@@ -31,7 +31,7 @@ def main():
         model.target_permalink = story.permalink
 
     def edit_story(model):
-        story = reddit.post(reddit.submission.id_from_url(model.target_permalink))
+        story = reddit.submission(model.target_permalink)
         story.edit(f"{model.body}\n\n[Story From r/{model.subreddit}]({model.source_permalink})")
 
 
