@@ -8,6 +8,7 @@ GammaGames:  # Take stories from /u/GammaGames
       - delay:  # Only sync them after a delay. This can be in hours, days, weeks, etc.
           days: 2
       - require-title  # Require a title? I almost always have one
+      - extract-title  # If not extracted, it will use the OP title
     shortstories:
       posts:  # Sync post stories from r/ss
       - delay:
@@ -16,5 +17,7 @@ GammaGames:  # Take stories from /u/GammaGames
       - delay:
           days: 2
       - require-title
+      - extract-title
+      - extract-subtitle  # Useful for serials that have sub-headers
   to:  # Post the stories to r/GammeWrites
     GammaWrites

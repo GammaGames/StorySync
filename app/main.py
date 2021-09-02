@@ -61,13 +61,13 @@ def main():
                 model.body = comment.body
 
                 print(f"Creating {model.id}: {model.title}")
-                # post_story(model)
+                post_story(model)
 
             elif comment.edited and comment.body != model.body:
                 model.body = comment.body
 
                 print(f"Updating {model.id}: {model.title}")
-                # edit_story(model)
+                edit_story(model)
 
             else:
                 print(f"Skipping {model.id}: {model.title}")

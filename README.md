@@ -24,6 +24,7 @@ GammaGames:  # Take stories from /u/GammaGames
       - delay:  # Only sync them after a delay. This can be in hours, days, weeks, etc.
           days: 2
       - require-title  # Require a title? I almost always have one
+      - extract-title  # If not extracted, it will use the OP title
     shortstories:
       posts:  # Sync post stories from r/ss
       - delay:
@@ -32,6 +33,8 @@ GammaGames:  # Take stories from /u/GammaGames
       - delay:
           days: 2
       - require-title
+      - extract-title
+      - extract-subtitle  # Useful for serials that have sub-headers
   to:  # Post the stories to r/GammeWrites
     GammaWrites
 ```
@@ -42,7 +45,6 @@ Additional notes:
 2. I filter out any stories that aren't immediate children of the post. Because of this, Prompt Me responses are not collected
 3. If there is a delay and the comment goes past the count before the delay is over, the story will not be synced
 4. I filter out stickied comments, because those are usually mod actions
-5. I try to pull out titles and sub-titles (for serials)
 
 Want to make the process automatic? Add this to your `/etc/crontab` file!
 
