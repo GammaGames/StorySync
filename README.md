@@ -26,7 +26,7 @@ GammaGames:  # Take stories from /u/GammaGames
       - require-title  # Require a title? I almost always have one
       - extract-title  # If not extracted, it will use the OP title
     shortstories:
-      posts:  # Sync post stories from r/ss
+      posts:  # Sync post stories
       - delay:
           days: 2
       comments:  # Sync comment stories, similar as above
