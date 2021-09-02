@@ -45,23 +45,29 @@ def main():
 
         for comment in comments:
             model = Story[comment.id, "comment"] if Story.exists(id=comment.id, type="comment") else Story(id=comment.id, type="comment")
+            # If we're extracting title, try to extract it. Also optionally get subtitle
+            if "extract-title" in settings["from"][comment.subreddit.display_name]["comments"]:
+                model.title = parse_comment_title(
+                    comment.body,
+                    "extract-subtitle" in settings["from"][comment.subreddit.display_name]["comments"]
+                )
+            else:
+                model.title = comment.submission.title
 
             if model.target_permalink is None:
                 model.source_permalink = comment.permalink
                 model.subreddit = comment.subreddit.display_name
                 model.source_permalink = comment.permalink
-                model.title = parse_comment_title(comment.body, True)
                 model.body = comment.body
 
                 print(f"Creating {model.id}: {model.title}")
-                post_story(model)
+                # post_story(model)
 
             elif comment.edited and comment.body != model.body:
-                model.title = parse_comment_title(comment.body, True)
                 model.body = comment.body
 
                 print(f"Updating {model.id}: {model.title}")
-                edit_story(model)
+                # edit_story(model)
 
             else:
                 print(f"Skipping {model.id}: {model.title}")
